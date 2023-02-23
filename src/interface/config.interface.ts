@@ -6,7 +6,7 @@ export interface ConfigInit {
 }
 
 export interface Config {
-  decimals?: number;
+  decimals?: number | null;
   decPoint?: string;
   thousandsSep?: string;
   currencyDefault?: string;

@@ -6,71 +6,56 @@ import { global } from '../config';
 
 export const useFormateNumber = (
   num: number,
-  currency: string
+  currency: string | null
 ): string | number => {
   const number = numberFormat({ number: num });
   const simbol = currency || global.currencyDefault;
 
-  return typeof num === 'number' ? `${simbol} ${number}` : num;
+  return `${simbol} ${number}`;
 };
 
 export const useFormateNumberSapn = (
   num: number,
-  currency: string
+  currency: string | null
 ): FormateNumber => {
   const simbol = currency || global.currencyDefault;
 
-  return typeof num === 'number'
-    ? {
-        num: numberFormat({ number: num }),
-        simbol,
-      }
-    : { num };
+  return {
+    num: numberFormat({ number: num }),
+    simbol,
+  };
 };
 
 export const useFormateOnlyNumber = (num: number): FormateNumber => {
-  return typeof num === 'number'
-    ? {
-        num: numberFormat({ number: num }),
-      }
-    : { num };
+  return {
+    num: numberFormat({ number: num }),
+  };
+};
+
+export const useFormateNumberDetail = (detail: NumberEdit): FormateNumber => {
+  return {
+    num: numberFormat(detail),
+  };
 };
 
 const numberFormat = (edit: NumberEdit): string => {
   let { number, decimals, decPoint, thousandsSep } = edit;
   number = parseFloat(`${number}`.replace(/[^0-9+\-Ee.]/g, ''));
-  const n: number = typeof number !== 'number' ? 0 : +number;
-  const prec: number =
-    typeof number !== 'number'
-      ? number % 1 === 0
-        ? 0
-        : 2
-      : Math.abs(number % 1 === 0 ? 0 : decimals || global.decimals);
+  const n: number = +number;
+  const prec: number = Math.abs(
+    number % 1 === 0 ? 0 : decimals || global.decimals
+  );
   const sep: string = thousandsSep || global.thousandsSep;
   const dec: string = decPoint || global.decPoint;
   let s: string | string[] = '';
 
   const toFixedFix = (n: number, prec: number): string | number => {
-    if (`${n}`.indexOf('e') === -1) {
-      return +`${Math.round(parseFloat(`${n}e+${prec}`))}e-${prec}`;
-    }
-    const arr = `${n}`.split('e');
-    let sig = '';
-    if (+arr[1] + prec > 0) {
-      sig = '+';
-    }
-    return (+`${Math.round(
-      parseFloat(`${+arr[0]}e${sig}${+arr[1] + prec}`)
-    )}e-${prec}`).toFixed(prec);
+    return n.toFixed(prec);
   };
   // @todo: for IE parseFloat(0.55).toFixed(0) = 0;
   s = (prec ? toFixedFix(n, prec).toString() : `${Math.round(n)}`).split('.');
   if (s[0].length > 3) {
     s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
-  }
-  if ((s[1] || '').length < prec) {
-    s[1] = s[1] || '';
-    s[1] += new Array(prec - s[1].length + 1).join('0');
   }
   return s.join(dec);
 };
