@@ -1,1 +1,1 @@
-export const useFormateDate = (date: string) => date
+export const useFormateDate = (date: string) => date;
